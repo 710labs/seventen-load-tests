@@ -1,0 +1,42 @@
+{
+	"name": "seventen-load-tests",
+	"version": "1.0.0",
+	"description": "Flood Element test script",
+	"main": "the-list-core3-update-tests.perf",
+	"private": true,
+	"prettier": {
+		"semi": false,
+		"singleQuote": true,
+		"trailingComma": "all",
+		"printWidth": 100,
+		"useTabs": true,
+		"tabWidth": 2,
+		"bracketSpacing": true,
+		"jsxBracketSameLine": true,
+		"arrowParens": "avoid"
+	},
+	"scripts": {
+		"staging:latest:load:vu:1": "npx element run the-list-core3-update-tests.perf.ts --loop-count=1",
+		"staging:latest:load:vu:10": "npx element run the-list-core3-update-tests.perf.ts --loop-count=10",
+		"staging:latest:load:vu:25": "npx element run the-list-core3-update-tests.perf.ts --loop-count=25"
+	},
+	"dependencies": {
+		"assert": "*",
+		"faker": "^6.6.6",
+		"prettier": "*"
+	},
+	"devDependencies": {
+		"@faker-js/faker": "^6.0.0-beta.0",
+		"@flood/element": "^2.0.4",
+		"@flood/element-cli": "^2.0.4",
+		"@types/assert": "*",
+		"@types/faker": "*",
+		"@types/uuid": "^8.3.4",
+		"uuid": "^8.3.2"
+	},
+	"element": {
+		"testMatch": [
+			"**/*.perf.[tj]s"
+		]
+	}
+}
