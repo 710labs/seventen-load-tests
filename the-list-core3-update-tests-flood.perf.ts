@@ -1,11 +1,17 @@
 import { step, TestSettings, By, beforeAll, afterAll, Until } from '@flood/element'
-import { faker } from '@faker-js/faker'
 
 export const settings: TestSettings = {
-	userAgent: 'seventen-flood-chrome-test',
-	name: 'seventen-load-tests-baseline',
-	loopCount: Infinity,
+	userAgent: 'seventen-core3update-flood-chrome-test',
+	name: 'seventen-load-tests-core3update-flood',
+	loopCount: -1,
+	screenshotOnFailure: true,
+	disableCache: false,
+	clearCache: true,
+	clearCookies: true,
+	actionDelay: 1.5,
+	stepDelay: 2.5,
 	waitUntil: 'visible',
+	waitTimeout: '60s',
 }
 
 export default () => {
@@ -18,16 +24,16 @@ export default () => {
 	let billingCity: string
 	let billingPostCode: string
 	var usageTypes = ['recreational', 'medical']
-	var medicalCardFileTypes = ['cards/medical/medical-card.png']
+	var medicalCardFileTypes = ['medical-card.png']
 	var driversLicenseFileTypes = [
-		'cards/drivers-license/drivers-license.jpg',
-		'cards/drivers-license/drivers-license.png',
-		'cards/drivers-license/drivers-license.heic',
-		'cards/drivers-license/drivers-license.pdf',
-		'cards/drivers-license/drivers-license.gif',
-		'cards/drivers-license/drivers-license.webp',
-		'cards/drivers-license/drivers-license.bmp',
-		'cards/limit-image-size.jpg',
+		'drivers-license.jpg',
+		'drivers-license.png',
+		'drivers-license.heic',
+		'drivers-license.pdf',
+		'drivers-license.gif',
+		'drivers-license.webp',
+		'drivers-license.bmp',
+		'limit-image-size.jpg',
 	]
 	let medicalCard: string
 	let driversLicense: string
@@ -51,19 +57,23 @@ export default () => {
 
 	beforeAll(async browser => {
 		await browser.wait('500ms')
-		const id = faker.random.alphaNumeric(8)
+		const id = Math.floor(Math.random() * 99999)
 		email = `test-${id}@playwright.dev`
-		password = id
-		firstName = faker.name.firstName()
-		lastName = faker.name.lastName()
-		billingAddress = faker.address.streetAddress()
-		billingCity = faker.address.city()
+		password = `password${id}`
+		firstName = `first${id}`
+		lastName = `last${id}`
+		billingAddress = '123 Front Street'
+		billingCity = 'Malibu City'
 		usageType = usageTypes[Math.floor(Math.random() * usageTypes.length)]
 		zipCode = zipcodes[Math.floor(Math.random() * zipcodes.length)]
 		billingPostCode = zipCode
 		medicalCard = medicalCardFileTypes[Math.floor(Math.random() * medicalCardFileTypes.length)]
 		driversLicense =
 			driversLicenseFileTypes[Math.floor(Math.random() * driversLicenseFileTypes.length)]
+		await browser.visit(url)
+		await browser.evaluate(() => {
+			document.cookie = 'vipChecker=3'
+		})
 	})
 
 	afterAll(async browser => {
@@ -71,7 +81,6 @@ export default () => {
 	})
 
 	step('Pass Age Gate', async browser => {
-		await browser.visit(url)
 		const ageGateConfirmButton = By.attr('button', 'name', 'age_gate[confirm]')
 		await browser.wait(Until.elementIsVisible(ageGateConfirmButton))
 		await (await browser.findElement(ageGateConfirmButton)).click()
@@ -84,24 +93,38 @@ export default () => {
 	})
 
 	step(`Create Account`, async browser => {
+		await browser.wait(Until.elementIsVisible(By.attr('a', 'href', '/register/')))
 		await browser.click(By.attr('a', 'href', '/register/'))
 		await browser.type(By.id('reg_email'), email)
 		await browser.type(By.id('reg_password'), password)
-		await browser.click(By.attr('input', 'value', usageType))
 		await browser.type(By.id('svntn_core_registration_zip'), zipCode)
-		await browser.selectByValue(By.css('.month'), '12')
-		await browser.selectByValue(By.css('.day'), '16')
-		await browser.selectByValue(By.css('.year'), '1988')
-		const driversLicenceInput = await browser.findElement(By.id('wccf_user_field_drivers_license'))
-		driversLicenceInput.uploadFile(driversLicense)
-		const medicalCardInput = await browser.findElement(By.id('wccf_user_field_medical_card'))
-		medicalCardInput.uploadFile(medicalCard)
-		await browser.wait('5000ms')
+		await browser.selectByValue(By.css('#svntn_core_dob_month_sbmt'), '12')
+		await browser.selectByValue(By.css('#svntn_core_dob_day_sbmt'), '16')
+		await browser.selectByValue(By.css('#svntn_core_dob_year_sbmt'), '1988')
 		await browser.wait(Until.elementIsVisible(By.attr('button', 'name', 'register')))
 		await browser.click(By.attr('button', 'name', 'register'))
 	})
 
+	step(`Complete Account`, async browser => {
+		await browser.click(By.attr('input', 'value', usageType))
+		if (usageType == 'recreational') {
+			const driversLicenceInput = await browser.findElement(By.id('svntn_core_personal_doc'))
+			driversLicenceInput.uploadFile(driversLicense)
+		} else {
+			const driversLicenceInput = await browser.findElement(By.id('svntn_core_personal_doc'))
+			driversLicenceInput.uploadFile(driversLicense)
+			const medicalCardInput = await browser.findElement(By.id('svntn_core_medical_doc'))
+			medicalCardInput.uploadFile(medicalCard)
+		}
+		await browser.wait('5000ms')
+		await browser.wait(
+			Until.elementIsVisible(By.attr('input', 'id', 'svntn_core_eligibility_post')),
+		)
+		await browser.click(By.attr('input', 'id', 'svntn_core_eligibility_post'))
+	})
+
 	step('Load Cart', async browser => {
+		await browser.wait(Until.elementIsVisible(By.css('.add_to_cart_button')))
 		let buttons = await browser.findElements(By.css('.add_to_cart_button'))
 		for (let i = 0; i < getRandomArbitrary(5, 8); i++) {
 			try {
