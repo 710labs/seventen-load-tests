@@ -1,9 +1,9 @@
 import { step, TestSettings, By, beforeAll, afterAll, Until } from '@flood/element'
 
 export const settings: TestSettings = {
-	userAgent: 'seventen-flood-chrome-test',
-	name: 'seventen-load-tests-baseline-flood',
-	loopCount: -1,
+	userAgent: 'seventen-load-tests-flood',
+	name: 'seventen-basic-user-workflow-flood',
+	loopCount: 1,
 	screenshotOnFailure: true,
 	disableCache: false,
 	clearCache: true,
@@ -11,10 +11,11 @@ export const settings: TestSettings = {
 	actionDelay: 1.5,
 	stepDelay: 2.5,
 	waitUntil: 'visible',
+	waitTimeout: '90s',
 }
 
 export default () => {
-	const url = 'https://staging.710labs.com'
+	const url = 'https://thelist-dev.710labs.com'
 	let email: string
 	let password: string
 	let firstName: string
@@ -39,16 +40,16 @@ export default () => {
 	let usageType: string
 	let zipCode: string
 	let zipcodes = [
-		'91331',
-		'90011',
-		'92683',
-		'91710',
-		'94806',
-		'94544',
-		'94080',
-		'94112',
-		'94403',
-		'94062',
+		'91011',
+		'91204',
+		'91615',
+		'91606',
+		'90088',
+		'90009',
+		'91387',
+		'91343',
+		'91611',
+		'91617',
 	]
 	function getRandomArbitrary(min: number, max: number) {
 		return Math.random() * (max - min) + min
@@ -69,6 +70,9 @@ export default () => {
 		medicalCard = medicalCardFileTypes[Math.floor(Math.random() * medicalCardFileTypes.length)]
 		driversLicense =
 			driversLicenseFileTypes[Math.floor(Math.random() * driversLicenseFileTypes.length)]
+		await browser.visit(url)
+		await browser.clearBrowserCache()
+		await browser.clearBrowserCookies()
 	})
 
 	afterAll(async browser => {
@@ -76,7 +80,6 @@ export default () => {
 	})
 
 	step('Pass Age Gate', async browser => {
-		await browser.visit(url)
 		const ageGateConfirmButton = By.attr('button', 'name', 'age_gate[confirm]')
 		await browser.wait(Until.elementIsVisible(ageGateConfirmButton))
 		await (await browser.findElement(ageGateConfirmButton)).click()
@@ -93,17 +96,32 @@ export default () => {
 		await browser.click(By.attr('a', 'href', '/register/'))
 		await browser.type(By.id('reg_email'), email)
 		await browser.type(By.id('reg_password'), password)
-		await browser.click(By.attr('input', 'value', usageType))
+		await browser.type(By.id('svntn_core_registration_firstname'), firstName)
+		await browser.type(By.id('svntn_core_registration_lastname'), lastName)
+		await browser.selectByValue(By.css('#svntn_core_dob_month_sbmt'), '12')
+		await browser.selectByValue(By.css('#svntn_core_dob_day_sbmt'), '16')
+		await browser.selectByValue(By.css('#svntn_core_dob_year_sbmt'), '1988')
 		await browser.type(By.id('svntn_core_registration_zip'), zipCode)
-		await browser.selectByValue(By.css('.month'), '12')
-		await browser.selectByValue(By.css('.day'), '16')
-		await browser.selectByValue(By.css('.year'), '1988')
-		const driversLicenceInput = await browser.findElement(By.id('wccf_user_field_drivers_license'))
-		driversLicenceInput.uploadFile(driversLicense)
-		const medicalCardInput = await browser.findElement(By.id('wccf_user_field_medical_card'))
-		medicalCardInput.uploadFile(medicalCard)
 		await browser.wait(Until.elementIsVisible(By.attr('button', 'name', 'register')))
 		await browser.click(By.attr('button', 'name', 'register'))
+	})
+
+	step(`Complete Account`, async browser => {
+		await browser.click(By.attr('input', 'value', usageType))
+		if (usageType == 'recreational') {
+			const driversLicenceInput = await browser.findElement(By.id('svntn_core_personal_doc'))
+			driversLicenceInput.uploadFile(driversLicense)
+		} else {
+			const driversLicenceInput = await browser.findElement(By.id('svntn_core_personal_doc'))
+			driversLicenceInput.uploadFile(driversLicense)
+			const medicalCardInput = await browser.findElement(By.id('svntn_core_medical_doc'))
+			medicalCardInput.uploadFile(medicalCard)
+		}
+		await browser.wait('5000ms')
+		await browser.wait(
+			Until.elementIsVisible(By.attr('input', 'id', 'svntn_core_eligibility_post')),
+		)
+		await browser.click(By.attr('input', 'id', 'svntn_core_eligibility_post'))
 	})
 
 	step('Load Cart', async browser => {
@@ -140,11 +158,12 @@ export default () => {
 	step('Complete Order', async browser => {
 		await browser.wait(Until.elementIsVisible(By.id('place_order')))
 		await browser.click(By.id('place_order'))
-		await browser.wait(
-			Until.elementTextContains(
-				By.css('.woocommerce-thankyou-order-received'),
-				'Thank you. Your order has been received.',
-			),
-		)
+	})
+	step('Schedule Delivery', async browser => {
+		let scheduleDays = await browser.findElements(By.css('#svntnAcuityDateChoices > .acuityChoice'))
+		await browser.click(scheduleDays[0])
+		let scheduleTimes = await browser.findElements(By.css('#svntnAcuityTimeChoices > .acuityChoice'))
+		await browser.click(scheduleTimes[0])
+		await browser.click(By.id('svntnAcuitySubmit'))
 	})
 }
