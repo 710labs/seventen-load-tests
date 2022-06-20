@@ -3,7 +3,7 @@ import { step, TestSettings, By, beforeAll, afterAll, Until } from '@flood/eleme
 export const settings: TestSettings = {
 	userAgent: 'seventen-load-tests-flood',
 	name: 'seventen-basic-user-workflow-flood',
-	loopCount: 1,
+	loopCount: -1,
 	screenshotOnFailure: true,
 	disableCache: false,
 	clearCache: true,
@@ -15,7 +15,7 @@ export const settings: TestSettings = {
 }
 
 export default () => {
-	const url = 'https://thelist-dev.710labs.com'
+	const url = 'https://thelist-stage.710labs.com'
 	let email: string
 	let password: string
 	let firstName: string
@@ -51,7 +51,7 @@ export default () => {
 		'91611',
 		'91617',
 	]
-	function getRandomArbitrary(min: number, max: number) {
+	function getRandomNumber(min: number, max: number) {
 		return Math.random() * (max - min) + min
 	}
 
@@ -127,7 +127,7 @@ export default () => {
 	step('Load Cart', async browser => {
 		await browser.wait(Until.elementIsVisible(By.css('.add_to_cart_button')))
 		let buttons = await browser.findElements(By.css('.add_to_cart_button'))
-		for (let i = 0; i < getRandomArbitrary(5, 8); i++) {
+		for (let i = 0; i < getRandomNumber(5, 8); i++) {
 			try {
 				await browser.click(buttons[i])
 			} catch {
