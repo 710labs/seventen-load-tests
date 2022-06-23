@@ -16,8 +16,8 @@
 		"arrowParens": "avoid"
 	},
 	"scripts": {
-		"staging:latest:test": "d",
-		"staging:latest:load:vu:1": "npx element run the-list-ca-basic-user-worklflow-flood.perf.ts",
+		"staging:latest:test": "npx element run the-list-ca-basic-user-worklflow-flood.perf.ts --loop-count=1",
+		"staging:latest:load:vu:1": "npx element run the-list-ca-basic-user-worklflow-flood.perf.ts --loop-count=1",
 		"staging:latest:load:vu:10": "npx element run the-list-ca-basic-user-worklflow-flood.perf.ts --loop-count=10",
 		"staging:latest:load:vu:25": "npx element run the-list-ca-basic-user-worklflow-flood.perf.ts --loop-count=25"
 	},
