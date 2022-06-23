@@ -16,10 +16,10 @@
 		"arrowParens": "avoid"
 	},
 	"scripts": {
-		"staging:latest:test": "npx element run the-list-basic-user-worklflow-flood.perf.ts --no-headless --loop-count=1",
-		"staging:latest:load:vu:1": "npx element run the-list-basic-user-worklflow-flood.perf.ts --loop-count=1",
-		"staging:latest:load:vu:10": "npx element run the-list-basic-user-worklflow-flood.perf.ts --loop-count=10",
-		"staging:latest:load:vu:25": "npx element run the-list-core3-update-tests.perf.ts --loop-count=25"
+		"staging:latest:test": "d",
+		"staging:latest:load:vu:1": "npx element run the-list-ca-basic-user-worklflow-flood.perf.ts",
+		"staging:latest:load:vu:10": "npx element run the-list-ca-basic-user-worklflow-flood.perf.ts --loop-count=10",
+		"staging:latest:load:vu:25": "npx element run the-list-ca-basic-user-worklflow-flood.perf.ts --loop-count=25"
 	},
 	"dependencies": {
 		"assert": "*",

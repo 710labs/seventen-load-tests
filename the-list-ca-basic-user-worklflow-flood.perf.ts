@@ -162,7 +162,9 @@ export default () => {
 	step('Schedule Delivery', async browser => {
 		let scheduleDays = await browser.findElements(By.css('#svntnAcuityDateChoices > .acuityChoice'))
 		await browser.click(scheduleDays[0])
-		let scheduleTimes = await browser.findElements(By.css('#svntnAcuityTimeChoices > .acuityChoice'))
+		let scheduleTimes = await browser.findElements(
+			By.css('#svntnAcuityTimeChoices > .acuityChoice'),
+		)
 		await browser.click(scheduleTimes[0])
 		await browser.click(By.id('svntnAcuitySubmit'))
 	})
