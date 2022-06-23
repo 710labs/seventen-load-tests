@@ -4,7 +4,7 @@ export const settings: TestSettings = {
 	userAgent: 'seventen-load-tests-flood',
 	name: 'seventen-basic-user-workflow-flood',
 	loopCount: -1,
-	screenshotOnFailure: true,
+	screenshotOnFailure: false,
 	disableCache: false,
 	clearCache: true,
 	clearCookies: true,

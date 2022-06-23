@@ -5,7 +5,7 @@ module.exports = {
 		duration: -1,
 		failStatusCode: 1,
 		fastForward: false,
-		headless: false,
+		headless: true,
 		loopCount: 1,
 		sandbox: true,
 		slowMo: false,
