@@ -2,8 +2,8 @@ import { step, TestSettings, By, beforeAll, afterAll, Until } from '@flood/eleme
 import assert from 'assert'
 
 export const settings: TestSettings = {
-	userAgent: 'seventen-load-tests-flood-fl',
-	name: 'seventen-basic-user-workflow-flood-fl',
+	userAgent: 'seventen-load-tests-flood',
+	name: 'seventen-basic-user-workflow-flood',
 	loopCount: -1,
 	screenshotOnFailure: false,
 	disableCache: false,
@@ -41,16 +41,26 @@ export default () => {
 	let usageType: string
 	let zipCode: string
 	let zipcodes = [
-		'91011',
-		'91204',
-		'91615',
-		'91606',
-		'90088',
-		'90009',
-		'91387',
-		'91343',
-		'91611',
-		'91617',
+		'32003',
+		'32009',
+		'32011',
+		'32033',
+		'32034',
+		'32043',
+		'33403',
+		'33404',
+		'33405',
+		'33406',
+		'33407',
+		'34112',
+		'34113',
+		'34114',
+		'34116',
+		'34117',
+		'34119',
+		'34120',
+		'34134',
+		'34135',
 	]
 	function getRandomNumber(min: number, max: number) {
 		return Math.random() * (max - min) + min
@@ -64,7 +74,7 @@ export default () => {
 		firstName = `first${id}`
 		lastName = `last${id}`
 		billingAddress = '123 Front Street'
-		billingCity = 'Malibu City'
+		billingCity = 'Boca Raton'
 		usageType = usageTypes[Math.floor(Math.random() * usageTypes.length)]
 		zipCode = zipcodes[Math.floor(Math.random() * zipcodes.length)]
 		billingPostCode = zipCode
@@ -113,18 +123,21 @@ export default () => {
 
 	step(`Complete Account`, async browser => {
 		const completeAccountLink = By.attr('input', 'id', 'svntn_core_eligibility_post')
-		const usageTypeSelector = By.attr('input', 'value', usageType)
-		assert.ok(usageTypeSelector != null, 'usageTypeSelector Not Found/Visible')
-		await browser.click(usageTypeSelector)
-		if (usageType == 'recreational') {
-			const driversLicenceInput = await browser.findElement(By.id('svntn_core_personal_doc'))
-			driversLicenceInput.uploadFile(driversLicense)
-		} else {
-			const driversLicenceInput = await browser.findElement(By.id('svntn_core_personal_doc'))
-			driversLicenceInput.uploadFile(driversLicense)
-			const medicalCardInput = await browser.findElement(By.id('svntn_core_medical_doc'))
-			medicalCardInput.uploadFile(medicalCard)
-		}
+
+		const driversLicenceInput = await browser.findElement(By.id('svntn_core_personal_doc'))
+		assert.ok(driversLicenceInput != null, 'DL Upload Not Found/Visible')
+		driversLicenceInput.uploadFile(driversLicense)
+
+		const medicalCardInput = await browser.findElement(By.id('svntn_core_medical_doc'))
+		assert.ok(medicalCardInput != null, 'Medical Card Upload Not Found/Visible')
+		medicalCardInput.uploadFile(medicalCard)
+
+		await browser.selectByValue(By.css('#svntn_core_mxp_month'), '12')
+		await browser.selectByValue(By.css('#svntn_core_mxp_day'), '16')
+		await browser.selectByValue(By.css('#svntn_core_mxp_year'), '2023')
+
+		await browser.type(By.id('svntn_fl_patient_id'), 'ABCD1234')
+
 		await browser.wait('5000ms')
 		await browser.wait(
 			Until.elementIsVisible(By.attr('input', 'id', 'svntn_core_eligibility_post')),
@@ -169,11 +182,10 @@ export default () => {
 	})
 
 	step('Complete Order', async browser => {
-		let completeOrderButton = By.id('place_order');
+		let completeOrderButton = By.id('place_order')
 		await browser.wait(Until.elementIsVisible(By.id('place_order')))
 		await browser.click(completeOrderButton)
 		assert.ok(completeOrderButton != null, 'Complete Order Button Not Found/Visible')
-
 	})
 	step('Schedule Delivery', async browser => {
 		let scheduleDays = await browser.findElements(By.css('#svntnAcuityDateChoices > .acuityChoice'))
