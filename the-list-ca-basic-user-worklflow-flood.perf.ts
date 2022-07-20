@@ -29,7 +29,6 @@ export default () => {
 	var driversLicenseFileTypes = [
 		'drivers-license.jpg',
 		'drivers-license.png',
-		'drivers-license.heic',
 		'drivers-license.pdf',
 		'drivers-license.gif',
 		'drivers-license.webp',
