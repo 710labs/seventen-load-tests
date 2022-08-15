@@ -1,4 +1,4 @@
-import { step, TestSettings, By, beforeAll, afterAll, Until } from '@flood/element'
+import { step, TestSettings, By, beforeAll, afterAll, Until, Device } from '@flood/element'
 import assert from 'assert'
 
 export const settings: TestSettings = {
@@ -153,7 +153,7 @@ export default () => {
 	})
 
 	step('Proceed to Checkout', async browser => {
-		let proceedToCheckoutButton = By.attr('div', 'class', 'wc-proceed-to-checkout')
+		let proceedToCheckoutButton = By.attr('a', 'class', 'checkout-button')
 		assert.ok(proceedToCheckoutButton != null, 'Proceed To Checkout Button Not Found/Visible')
 		await browser.click(proceedToCheckoutButton)
 	})

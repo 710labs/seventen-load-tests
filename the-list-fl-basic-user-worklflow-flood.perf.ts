@@ -1,14 +1,13 @@
-import { step, TestSettings, By, beforeAll, afterAll, Until } from '@flood/element'
+import { step, TestSettings, By, beforeAll, afterAll, Until, Device } from '@flood/element'
 import assert from 'assert'
 
 export const settings: TestSettings = {
 	userAgent: 'seventen-load-tests-flood',
 	name: 'seventen-basic-user-workflow-flood',
-	loopCount: -1,
+	loopCount: 2,
 	screenshotOnFailure: true,
 	disableCache: false,
 	clearCache: true,
-	clearCookies: true,
 	actionDelay: 2.5,
 	stepDelay: 2.5,
 	waitUntil: 'visible',
@@ -68,7 +67,7 @@ export default () => {
 	beforeAll(async browser => {
 		await browser.wait('500ms')
 		const id = Math.floor(Math.random() * 99999)
-		email = `test-${id}+710Labs@playwright.dev`
+		email = `test-${id}-${Date.now()}+710Labs@playwright.dev`
 		password = `password${id}`
 		firstName = `first${id}`
 		lastName = `last${id}`
@@ -166,7 +165,7 @@ export default () => {
 	})
 
 	step('Proceed to Checkout', async browser => {
-		let proceedToCheckoutButton = By.attr('div', 'class', 'wc-proceed-to-checkout')
+		let proceedToCheckoutButton = By.attr('a', 'class', 'checkout-button')
 		assert.ok(proceedToCheckoutButton != null, 'Proceed To Checkout Button Not Found/Visible')
 		await browser.click(proceedToCheckoutButton)
 	})
