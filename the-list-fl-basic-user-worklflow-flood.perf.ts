@@ -64,15 +64,15 @@ export default () => {
 		return Math.random() * (max - min) + min
 	}
 
-	beforeAll(async browser => {
+	step('Go to https://thelist.theflowery.co', async browser => {
 		await browser.wait('500ms')
 		const id = Math.floor(Math.random() * 99999)
-		email = `test-${id}-${Date.now()}+710Labs@playwright.dev`
+		email = `test-${id}+710Labs@playwright.dev`
 		password = `password${id}`
 		firstName = `first${id}`
 		lastName = `last${id}`
 		billingAddress = '123 Front Street'
-		billingCity = 'Boca Raton'
+		billingCity = 'Malibu City'
 		usageType = usageTypes[Math.floor(Math.random() * usageTypes.length)]
 		zipCode = zipcodes[Math.floor(Math.random() * zipcodes.length)]
 		billingPostCode = zipCode
@@ -82,10 +82,6 @@ export default () => {
 		await browser.visit(url)
 		await browser.clearBrowserCache()
 		await browser.clearBrowserCookies()
-	})
-
-	afterAll(async browser => {
-		await browser.wait('500ms')
 	})
 
 	step('Pass Age Gate', async browser => {

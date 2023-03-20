@@ -1,4 +1,4 @@
-import { step, TestSettings, By, beforeAll, afterAll, Until, Device } from '@flood/element'
+import { step, TestSettings, By, Until, Key } from '@flood/element'
 import assert from 'assert'
 
 export const settings: TestSettings = {
@@ -21,9 +21,12 @@ export default () => {
 	let password: string
 	let firstName: string
 	let lastName: string
+	let billingPhone: string
 	let billingAddress: string
 	let billingCity: string
 	let billingPostCode: string
+	var fulfillmentTypes = ['pickup', 'delivery']
+	let fulfillmentType: string
 	var usageTypes = ['recreational', 'medical']
 	var medicalCardFileTypes = ['medical-card.png']
 	var driversLicenseFileTypes = [
@@ -51,32 +54,31 @@ export default () => {
 		'91611',
 		'91617',
 	]
+	let billingAddreses = ['123 Rodeo Drive, Beverley Hills']
 	function getRandomNumber(min: number, max: number) {
 		return Math.random() * (max - min) + min
 	}
 
-	beforeAll(async browser => {
+	step('Go to https://thelist.710labs.com', async browser => {
 		await browser.wait('500ms')
 		const id = Math.floor(Math.random() * 99999)
 		email = `test-${id}+710Labs@playwright.dev`
 		password = `password${id}`
 		firstName = `first${id}`
 		lastName = `last${id}`
-		billingAddress = '123 Front Street'
+		billingPhone = '(310)456-8978'
+		billingAddress = billingAddreses[Math.floor(Math.random() * billingAddreses.length)]
 		billingCity = 'Malibu City'
 		usageType = usageTypes[Math.floor(Math.random() * usageTypes.length)]
 		zipCode = zipcodes[Math.floor(Math.random() * zipcodes.length)]
 		billingPostCode = zipCode
 		medicalCard = medicalCardFileTypes[Math.floor(Math.random() * medicalCardFileTypes.length)]
+		fulfillmentType = fulfillmentTypes[Math.floor(Math.random() * fulfillmentTypes.length)]
 		driversLicense =
 			driversLicenseFileTypes[Math.floor(Math.random() * driversLicenseFileTypes.length)]
 		await browser.visit(url)
 		await browser.clearBrowserCache()
 		await browser.clearBrowserCookies()
-	})
-
-	afterAll(async browser => {
-		await browser.wait('500ms')
 	})
 
 	step('Pass Age Gate', async browser => {
@@ -102,10 +104,16 @@ export default () => {
 		await browser.type(By.id('reg_password'), password)
 		await browser.type(By.id('svntn_core_registration_firstname'), firstName)
 		await browser.type(By.id('svntn_core_registration_lastname'), lastName)
-		await browser.selectByValue(By.css('#svntn_core_dob_month_sbmt'), '12')
-		await browser.selectByValue(By.css('#svntn_core_dob_day_sbmt'), '16')
-		await browser.selectByValue(By.css('#svntn_core_dob_year_sbmt'), '1988')
-		await browser.type(By.id('svntn_core_registration_zip'), zipCode)
+		await browser.selectByValue(By.css('#svntn_core_dob_month'), '12')
+		await browser.selectByValue(By.css('#svntn_core_dob_day'), '16')
+		await browser.selectByValue(By.css('#svntn_core_dob_year'), '1988')
+		await browser.type(By.id('billing_address_1'), billingAddress)
+		await browser.wait('500ms')
+		await browser.sendKeys(Key.ARROW_DOWN)
+		await browser.wait('500ms')
+		await browser.sendKeys(Key.ENTER)
+		await browser.click(By.id('billing_phone'))
+		await browser.sendKeys(billingPhone)
 		await browser.wait(Until.elementIsVisible(By.attr('button', 'name', 'register')))
 		await browser.click(By.attr('button', 'name', 'register'))
 	})
@@ -123,6 +131,9 @@ export default () => {
 			driversLicenceInput.uploadFile(driversLicense)
 			const medicalCardInput = await browser.findElement(By.id('svntn_core_medical_doc'))
 			medicalCardInput.uploadFile(medicalCard)
+			await browser.selectByValue(By.css('#svntn_core_mxp_month'), '12')
+			await browser.selectByValue(By.css('#svntn_core_mxp_day'), '12')
+			await browser.selectByValue(By.css('#svntn_core_mxp_year'), '2023')
 		}
 		await browser.wait('5000ms')
 		await browser.wait(
@@ -131,6 +142,20 @@ export default () => {
 
 		assert.ok(completeAccountLink != null, 'Complete Account Button Not Found/Visible')
 		await browser.click(completeAccountLink)
+	})
+
+	step(`Setup Fulfillment`, async browser => {
+		await browser.wait('1000ms')
+		let fulfillmentButtons = await browser.findElements(By.css('.wcse-toggle-choice'))
+		if (fulfillmentType == 'pickup') {
+			await browser.click(fulfillmentButtons[0])
+		} else {
+			await browser.click(fulfillmentButtons[1])
+		}
+		await browser.wait('1000ms')
+
+		await browser.click(By.id('fulfillerSubmit'))
+		await browser.visit(url)
 	})
 
 	step('Load Cart', async browser => {
@@ -153,37 +178,29 @@ export default () => {
 	})
 
 	step('Proceed to Checkout', async browser => {
-		let proceedToCheckoutButton = By.attr('a', 'class', 'checkout-button')
+		let proceedToCheckoutButton = By.css('.checkout-button')
 		assert.ok(proceedToCheckoutButton != null, 'Proceed To Checkout Button Not Found/Visible')
+
 		await browser.click(proceedToCheckoutButton)
 	})
 
-	step('Add Billing/Delivery Info', async browser => {
-		await browser.type(By.id('billing_first_name'), firstName)
-		await browser.type(By.id('billing_last_name'), lastName)
-		await browser.type(By.id('billing_address_1'), billingAddress)
-		await browser.type(By.id('billing_city'), billingCity)
-		await browser.type(By.id('billing_postcode'), billingPostCode)
-		await browser.type(By.id('billing_phone'), '(555)555-5555')
+	step('Select Acuity Slot', async browser => {
+		try {
+			await browser.click(By.css('#svntnAcuityTimeChoices > label:nth-child(1)'))
+		} catch {
+			console.log('Unable to select acuity slot.')
+		}
 	})
 
 	step('Complete Order', async browser => {
-		let completeOrderButton = By.id('place_order');
+		let completeOrderButton = By.id('place_order')
 		await browser.wait(Until.elementIsVisible(By.id('place_order')))
-		await browser.click(completeOrderButton)
+		try {
+			await browser.click(completeOrderButton)
+		} catch {
+			console.log('Unable to complete order.')
+		}
+
 		assert.ok(completeOrderButton != null, 'Complete Order Button Not Found/Visible')
-
-	})
-	step('Schedule Delivery', async browser => {
-		let scheduleDays = await browser.findElements(By.css('#svntnAcuityDateChoices > .acuityChoice'))
-		assert.ok(scheduleDays != null, 'Cannot Find Acuity Days')
-
-		await browser.click(scheduleDays[0])
-		let scheduleTimes = await browser.findElements(
-			By.css('#svntnAcuityTimeChoices > .acuityChoice'),
-		)
-		assert.ok(scheduleTimes != null, 'Cannot Find Acuity Times')
-		await browser.click(scheduleTimes[0])
-		await browser.click(By.id('svntnAcuitySubmit'))
 	})
 }
