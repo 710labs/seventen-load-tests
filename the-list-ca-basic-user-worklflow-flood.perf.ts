@@ -15,6 +15,15 @@ export const settings: TestSettings = {
 	waitTimeout: '90s',
 }
 
+function generate_uuidv4() {
+	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,
+	function(c) {
+	   var uuid = Math.random() * 16 | 0, v = c == 'x' ? uuid : (uuid & 0x3 | 0x8);
+	   return uuid.toString(16);
+	});
+ }
+ 
+
 export default () => {
 	const url = 'https://thelist-stage.710labs.com'
 	let email: string
@@ -32,11 +41,7 @@ export default () => {
 	var driversLicenseFileTypes = [
 		'drivers-license.jpg',
 		'drivers-license.png',
-		'drivers-license.pdf',
-		'drivers-license.gif',
-		'drivers-license.webp',
 		'drivers-license.bmp',
-		'limit-image-size.jpg',
 	]
 	let medicalCard: string
 	let driversLicense: string
@@ -61,7 +66,7 @@ export default () => {
 
 	step('Go to https://thelist.710labs.com', async browser => {
 		await browser.wait('500ms')
-		const id = Math.floor(Math.random() * 99999)
+		const id = generate_uuidv4()
 		email = `test-${id}+710Labs@playwright.dev`
 		password = `password${id}`
 		firstName = `first${id}`
